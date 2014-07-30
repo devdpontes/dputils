@@ -1,6 +1,6 @@
 /**
  * dpUtils Custom (alias dp)
- * v1.0.0
+ * v1.0.2
  *
  * Author and contributors:
  *  webdpontes@gmail.com
