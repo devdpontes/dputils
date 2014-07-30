@@ -3,15 +3,15 @@
  * v1.0.0
  *
  * Author and contributors:
- *  Daniel Pontes - webdpontes@gmail.com
+ *  webdpontes@gmail.com
  */
 (function (window) {
-    var BENCHMARK_MESSAGE = 'Function returned in {time}ms';
-    var INVALID_INPUT = 'Invalid input';
-    var COOKIE_GET = 'Cookie {name} is currently set to value {value}';
-    var COOKIE_SET = 'Cookie {name} has been set to {value} with expiry {expiry} for domain {domain}';
-    var COOKIE_REMOVED = 'Cookie {name} has been removed';
-    var ADD_TRIM_TO_IE_INIT = 'addTrimToIE has been initialised';
+    var BENCHMARK_MESSAGE = 'Function returned in {time}ms',
+        INVALID_INPUT = 'Invalid input',
+        COOKIE_GET = 'Cookie {name} is currently set to value {value}',
+        COOKIE_SET = 'Cookie {name} has been set to {value} with expiry {expiry} for domain {domain}',
+        COOKIE_REMOVED = 'Cookie {name} has been removed',
+        ADD_TRIM_TO_IE_INIT = 'addTrimToIE has been initialised';
 
     /**
      * @name dpUtils
@@ -19,7 +19,8 @@
      * @namespace dpUtils
      * @type object
      */
-    window.dpUtils = this.dpUtils = {};
+    var dpUtils = {};
+    window.dpUtils = this.dpUtils = dpUtils;
 
     // Declare alias dp
     window.dp = this.dp = dpUtils;
@@ -56,7 +57,7 @@
                 addTrimToIE();
             }
         }
-    }
+    };
 
     /**
      * @name Log
@@ -89,7 +90,8 @@
             var output = this.timeStamp() + ' [' + namespace + '] ' + message;
             console.log(output);
         }
-    }
+        return;
+    };
 
     /**
      * @name logException
@@ -117,7 +119,8 @@
 
         // Log namespace and message
         console.error('[' + namespace + '] ' + exception.toString());
-    }
+        return;
+    };
     
      /**
      * @name timeStamp
@@ -145,7 +148,7 @@
             .replace('minutes', minutes)
             .replace('seconds', seconds)
             .replace('miliseconds', miliseconds);
-    }
+    };
 
     /**
      * @name Benchmark
@@ -160,7 +163,7 @@
         if (dpUtils.config.benchmarking) {
             this.start = new Date().getTime();
         }
-    }
+    };
     dpUtils.Benchmark.prototype = (function () {
         return {
             constructor: dpUtils.Benchmark,
@@ -227,9 +230,8 @@
                 return '';
             } catch (exception) {
                 dpUtils.logException(exception, namespace);
-
-                return null;
             }
+            return null;
         },
 
         /**
@@ -282,8 +284,6 @@
                     namespace);
             } catch (exception) {
                 dpUtils.logException(exception, namespace);
-
-                return null;
             }
         },
 
@@ -295,8 +295,8 @@
          * @function
          */
         remove: function (name) {
-            var self = this;
-            var namespace = 'dpUtils.cookies.remove';
+            var self = this,
+                namespace = 'dpUtils.cookies.remove';
 
             try {
                 if (typeof name !== 'string') {
@@ -309,8 +309,6 @@
                 dpUtils.log(COOKIE_REMOVED.replace('{name}', name), namespace);
             } catch (exception) {
                 dpUtils.logException(exception, namespace);
-
-                return null;
             }
         },
 
@@ -342,9 +340,8 @@
                 return isCookieSet;
             } catch (exception) {
                 dpUtils.logException(exception, namespace);
-
-                return null;
             }
+            return null;
         }
     }
 
@@ -357,7 +354,7 @@
      */
     dpUtils.isNumber = function (number) {
         return !isNaN(parseFloat(number)) && isFinite(number) && number >= 0;
-    }
+    };
 
     /**
      * @name toBoolean
@@ -370,7 +367,7 @@
         var booleanProperty = (typeof(property) === 'string') ? property.toLowerCase() : property;
         var values = ['true', 'y', 'yes', '1', true];
         return (values.indexOf(booleanProperty) > -1);
-    }
+    };
 
     /**
      * @name parseModel
@@ -386,9 +383,9 @@
         } catch (exception) {
             sQ.logException(exception, namespace);
             sQ.logException(jsonString, namespace);
-            return false;
+            return {};
         }
-    }
+    };
 
     /**
      * @name getDecimalMark
@@ -400,7 +397,7 @@
     dpUtils.getDecimalMark = function (stringValue) {
         var mark = stringValue.match(/[\.,']/); // Gets the current decimal mark used
         return (mark) ? mark[0] : '.';
-    }
+    };
 
     /**
      * @name normalizeDecimal
@@ -414,7 +411,7 @@
             return stringValue.replace(decimalMark, '.');
         }
         return stringValue;
-    }
+    };
 
     /**
      * @name ordinalWithSuffix
@@ -436,7 +433,7 @@
             return number + "rd";
         }
         return number + "th";
-    }
+    };
 
     /**
      * @name isArray
@@ -447,7 +444,7 @@
      */
     dpUtils.isArray = function (arrayToCheck) {
         return typeof arrayToCheck === 'object' && arrayToCheck instanceof Array;
-    }
+    };
 
     /**
      * @name moveArrayPosition
@@ -467,7 +464,7 @@
         }
         sQ.logException('First argument is not an Array', namespace);
         return [];
-    }
+    };
 
     /**
      * @name isEmpty
@@ -498,7 +495,7 @@
             }
         }
         return true;
-    }
+    };
 
     /**
      * @name remainingTime
@@ -511,7 +508,7 @@
         var currentDate = new Date(),
             endDate = new Date(time);
         return endDate.getTime() - currentDate.getTime();
-    }
+    };
 
     /**
      * @name createHashTable
@@ -534,7 +531,7 @@
         }
 
         return hashTable;
-    }
+    };
 
     /**
      * @name addTrimToIe
@@ -555,8 +552,7 @@
             }
         } catch (exception) {
             dpUtils.logException(exception, namespace);
-
-            return null;
         }
-    }
+        return null;
+    };
 })(window);
