@@ -1,11 +1,18 @@
 /**
  * dpUtils Custom (alias dp)
- * v1.0.2
+ * v2.0.0
  *
  * Author and contributors:
  *  webdpontes@gmail.com
  */
-(function (window) {
+
+ /**
+ * @name dpUtils
+ * @description The dpUtils library
+ * @namespace dpUtils
+ * @type module
+ */
+var dpUtils = (function (fn) {
     var BENCHMARK_MESSAGE = 'Function returned in {time}ms',
         INVALID_INPUT = 'Invalid input',
         COOKIE_GET = 'Cookie {name} is currently set to value {value}',
@@ -13,23 +20,37 @@
         COOKIE_REMOVED = 'Cookie {name} has been removed',
         ADD_TRIM_TO_IE_INIT = 'addTrimToIE has been initialised';
 
-    /**
-     * @name dpUtils
-     * @description The dpUtils library
-     * @namespace dpUtils
-     * @type object
+     /**
+     * @name addTrimToIe
+     * @description Add trim functionality to strings for IE 8 and below
+     * @memberof dpUtils
+     * @function
      */
-    var dpUtils = {};
-    window.dpUtils = this.dpUtils = dpUtils;
+    var addTrimToIE = function () {
+        var namespace = 'dpUtils.addTrimToIE';
 
-    // Declare alias dp
-    window.dp = this.dp = dpUtils;
+        try {
+            if(typeof String.prototype.trim !== 'function') {
+                String.prototype.trim = function() {
+                    return this.replace(/^\s+|\s+$/g, '');
+                }
+
+                fn.log(ADD_TRIM_TO_IE_INIT, namespace);
+            }
+        } catch (exception) {
+            fn.logException(exception, namespace);
+        }
+        return null;
+    };
 
     // Default configuration
-    dpUtils.config = {
+    var utilsConfig = {
         logging: false,
         benchmarking: false
     };
+
+    // Define Alias
+    window.dp = fn;
 
     /**
      * @name Init
@@ -38,19 +59,19 @@
      * @param {object} [config] An object containing configuration keys
      * @function
      */
-    dpUtils.init = function (config) {
+    fn.init = function (config) {
         // Set config
         if (typeof config === 'object') {
             // Add defaults to input config object if none are set
-            for (var key in dpUtils.config) {
+            for (var key in utilsConfig) {
                 if (!config[key]) {
-                    config[key] = dpUtils.config[key];
+                    config[key] = utilsConfig[key];
                 }
             }
 
             // Reference the input config object
-            dpUtils.config = config;
-
+            utilsConfig = config;
+            setAlias(utilsConfig.alias);
 
             // Initialise optional modules
             if (config.addTrimToIE) {
@@ -67,9 +88,9 @@
      * @param {string} namespace The namespace to be attached to this message
      * @function
      */
-    dpUtils.log = function (message, namespace) {
+    fn.log = function (message, namespace) {
         // Abort if logging is turned off or if console is not available
-        if (!dpUtils.config.logging || !window.console) {
+        if (!fn.config.logging || !window.console) {
             return;
         }
 
@@ -101,7 +122,7 @@
      * @param {string} namespace The namespace to be attached to this exception
      * @function
      */
-    dpUtils.logException = function (exception, namespace) {
+    fn.logException = function (exception, namespace) {
         // If console is not available
         if (!window.console) {
             return;
@@ -129,7 +150,7 @@
      * @function
      * @returns {string}
      */
-    dpUtils.timeStamp = function () {
+    fn.timeStamp = function () {
         var date = new Date(),
             day = date.getDate(),
             month = date.getMonth(),
@@ -157,16 +178,16 @@
      * @param {string} namespace The namespace to be attached to this benchmark
      * @constructor
      */
-    dpUtils.Benchmark = function (namespace) {
+    fn.Benchmark = function (namespace) {
         this.namespace = namespace;
 
-        if (dpUtils.config.benchmarking) {
+        if (fn.config.benchmarking) {
             this.start = new Date().getTime();
         }
     };
-    dpUtils.Benchmark.prototype = (function () {
+    fn.Benchmark.prototype = (function () {
         return {
-            constructor: dpUtils.Benchmark,
+            constructor: fn.Benchmark,
 
             /**
              * @name finish
@@ -175,12 +196,12 @@
              * @function
              */
             finish: function () {
-                if (dpUtils.config.benchmarking) {
+                if (fn.config.benchmarking) {
                     var finish = new Date().getTime();
                     var duration = finish - this.start;
                     var message = BENCHMARK_MESSAGE.replace('{time}', duration.toString());
 
-                    dpUtils.log(message, this.namespace);
+                    fn.log(message, this.namespace);
                 }
             }
         }
@@ -192,7 +213,7 @@
      * @memberof dpUtils
      * @type object
      */
-    dpUtils.cookies = {
+    fn.cookies = {
         /**
          * @name get
          * @description Get cookie
@@ -218,7 +239,7 @@
                     if (cookie.indexOf(name + '=') > -1) {      // Cookie found
                         var cookieValue = cookie.split('=')[1]; // TODO use trim
 
-                        dpUtils.log(COOKIE_GET
+                        fn.log(COOKIE_GET
                             .replace('{name}', name)
                             .replace('{value}', cookieValue),
                             namespace);
@@ -229,7 +250,7 @@
 
                 return '';
             } catch (exception) {
-                dpUtils.logException(exception, namespace);
+                fn.logException(exception, namespace);
             }
             return null;
         },
@@ -276,14 +297,14 @@
                 // Set cookie
                 document.cookie = name + '=' + value + expires + '; path=' + domain;
 
-                dpUtils.log(COOKIE_SET
+                fn.log(COOKIE_SET
                     .replace('{name}', name)
                     .replace('{value}', value)
                     .replace('{expiry}', expiry.toString())
                     .replace('{domain}', domain),
                     namespace);
             } catch (exception) {
-                dpUtils.logException(exception, namespace);
+                fn.logException(exception, namespace);
             }
         },
 
@@ -306,9 +327,9 @@
                 // Remove cookie by setting it with a negative expiry
                 self.set(name, '', -1);
 
-                dpUtils.log(COOKIE_REMOVED.replace('{name}', name), namespace);
+                fn.log(COOKIE_REMOVED.replace('{name}', name), namespace);
             } catch (exception) {
-                dpUtils.logException(exception, namespace);
+                fn.logException(exception, namespace);
             }
         },
 
@@ -339,7 +360,7 @@
 
                 return isCookieSet;
             } catch (exception) {
-                dpUtils.logException(exception, namespace);
+                fn.logException(exception, namespace);
             }
             return null;
         }
@@ -352,7 +373,7 @@
      * @function
      * @returns {boolean}
      */
-    dpUtils.isNumber = function (number) {
+    fn.isNumber = function (number) {
         return !isNaN(parseFloat(number)) && isFinite(number) && number >= 0;
     };
 
@@ -363,7 +384,7 @@
      * @function
      * @returns {boolean}
      */
-    dpUtils.toBoolean = function (property) {
+    fn.toBoolean = function (property) {
         var booleanProperty = (typeof(property) === 'string') ? property.toLowerCase() : property;
         var values = ['true', 'y', 'yes', '1', true];
         return (values.indexOf(booleanProperty) > -1);
@@ -376,13 +397,13 @@
      * @function
      * @returns {object}
      */
-    dpUtils.parseJson = function (jsonString) {
-        var namespace = dpUtils.parseJson;
+    fn.parseJson = function (jsonString) {
+        var namespace = 'dpUtils.parseJson';
         try {
             return (typeof(jsonString) === 'string') ? JSON.parse(jsonString) : jsonString;
         } catch (exception) {
-            sQ.logException(exception, namespace);
-            sQ.logException(jsonString, namespace);
+            fn.logException(exception, namespace);
+            fn.logException(jsonString, namespace);
             return {};
         }
     };
@@ -394,7 +415,7 @@
      * @function
      * @returns {string}
      */
-    dpUtils.getDecimalMark = function (stringValue) {
+    fn.getDecimalMark = function (stringValue) {
         var mark = stringValue.match(/[\.,']/); // Gets the current decimal mark used
         return (mark) ? mark[0] : '.';
     };
@@ -406,7 +427,7 @@
      * @function
      * @returns {string}
      */
-    dpUtils.normalizeDecimal = function (stringValue, decimalMark) {
+    fn.normalizeDecimal = function (stringValue, decimalMark) {
         if (stringValue.indexOf(decimalMark)){
             return stringValue.replace(decimalMark, '.');
         }
@@ -421,7 +442,7 @@
      * @returns {string}
      * @example 2 returns "2nd"
      */
-    dpUtils.ordinalWithSuffix = function (number) {
+    fn.ordinalWithSuffix = function (number) {
         var remainder = number % 10;
         if (remainder == 1 && number != 11) {
             return number + "st";
@@ -442,7 +463,7 @@
      * @function
      * @returns {boolean}
      */
-    dpUtils.isArray = function (arrayToCheck) {
+    fn.isArray = function (arrayToCheck) {
         return typeof arrayToCheck === 'object' && arrayToCheck instanceof Array;
     };
 
@@ -453,16 +474,16 @@
      * @function
      * @returns {object}
      */
-    dpUtils.moveArrayPosition = function (arrayList, oldIndex, newIndex) {
+    fn.moveArrayPosition = function (arrayList, oldIndex, newIndex) {
         var namespace = 'dpUtils.moveArrayPosition';
-        if (dpUtils.isArray(arrayList)) {
+        if (fn.isArray(arrayList)) {
             if (newIndex >= arrayList.length) {
                 newIndex = arrayList.length -1;
             }
             arrayList.splice(newIndex, 0, arrayList.splice(oldIndex, 1)[0]);
             return arrayList;
         }
-        sQ.logException('First argument is not an Array', namespace);
+        fn.logException('First argument is not an Array', namespace);
         return [];
     };
 
@@ -473,7 +494,7 @@
      * @function
      * @returns {boolean}
      */
-    dpUtils.isEmpty = function (obj) {
+    fn.isEmpty = function (obj) {
         // null and undefined are "empty"
         if (obj == null) {
             return true;
@@ -504,7 +525,7 @@
      * @function
      * @returns {number}
      */
-    dpUtils.remainingTime = function (time) {
+    fn.remainingTime = function (time) {
         var currentDate = new Date(),
             endDate = new Date(time);
         return endDate.getTime() - currentDate.getTime();
@@ -517,42 +538,22 @@
      * @function
      * @params {object, string}
      */
-    dpUtils.createHashTable = function (arrayList, propertyName) {
+    fn.createHashTable = function (arrayList, propertyName) {
         var namespace = 'dpUtils.createHashTable',
             hashTable = {};
         if (propertyName && typeof propertyName === 'string') {
-            if (dpUtils.isArray(arrayList) && !!arrayList.length) {
+            if (fn.isArray(arrayList) && !!arrayList.length) {
                 for (var i = 0; i < arrayList.length; i++) {
                     hashTable[arrayList[i][propertyName]] = arrayList[i];
                 }
             }
         } else {
-            dp.logException('Please provide a string type propertyName', namespace);
+            fn.logException('Please provide a string type propertyName', namespace);
         }
 
         return hashTable;
     };
 
-    /**
-     * @name addTrimToIe
-     * @description Add trim functionality to strings for IE 8 and below
-     * @memberof dpUtils
-     * @function
-     */
-    var addTrimToIE = function () {
-        var namespace = 'dpUtils.addTrimToIE';
+    return fn;
 
-        try {
-            if(typeof String.prototype.trim !== 'function') {
-                String.prototype.trim = function() {
-                    return this.replace(/^\s+|\s+$/g, '');
-                }
-
-                dpUtils.log(ADD_TRIM_TO_IE_INIT, namespace);
-            }
-        } catch (exception) {
-            dpUtils.logException(exception, namespace);
-        }
-        return null;
-    };
-})(window);
+})(dpUtils || {});
